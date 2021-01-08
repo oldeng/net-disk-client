@@ -161,7 +161,7 @@ export default {
 				NoticeFlag: true,
 				NoticeBubble: true
 			},
-			login: false,
+			login: true,
 			UserInfo: {}
 		};
 	},
@@ -275,6 +275,8 @@ export default {
 		}
 	},
 	created() {
+		alert('主窗口');
+		console.log('主窗口');
 		this.Bind();
 		this.NoticeSrc = localStorage.NoticeVoice;
 	},
@@ -310,6 +312,7 @@ export default {
 				false
 			);
 			localStorage.server = this.$Api.Public.severAddress();
+			debugger;
 			this.$ipc.on('download', (e, file, completed) => {
 				completed && this.DiskFeatureControl('popup', file.name + '下载完成'); /*消息提醒*/
 				for (let i = 0; i < this.TransformData.length; i++) {
@@ -1120,6 +1123,12 @@ export default {
 			});
 			return result;
 		}
+	},
+	mounted() {
+		setTimeout(() => {
+			alert('主窗口');
+			console.log('主窗口');
+		}, 1000);
 	}
 };
 </script>

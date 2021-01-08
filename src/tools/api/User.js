@@ -6,17 +6,17 @@ export default {
 		Ajax({
 			url: '/user/login',
 			data: data,
-			success: rs => {
-				if (rs[0].state === 'success') {
-					LocalFile.init(rs[0].userid, () => {
-						rs[0].head = severAddress() + '/' + rs[0].head + '?' + Date.now();
-						data.id = rs[0].userid;
-						LocalFile.write('key', data.id);
+			success: res => {
+				if (res.success) {
+					LocalFile.init(res.data.userId, () => {
+						// rs[0].head = severAddress() + '/' + rs[0].head + '?' + Date.now();
+						// data.id = rs[0].userid;
+						LocalFile.write('key', res.data.userId);
 						LocalFile.write('login', JSON.parse(JSON.stringify(data)), true);
-						callback && callback(rs);
+						callback && callback(res);
 					});
 				} else {
-					error && error(rs);
+					error && error(res);
 				}
 			},
 			error: error

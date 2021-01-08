@@ -133,6 +133,7 @@ export default {
 			}
 		},
 		GetUserInfo() {
+			debugger;
 			this.$Api.User.UserInfo(
 				rs => {
 					this.$nextTick(() => {
@@ -145,7 +146,7 @@ export default {
 						onClose: () => {
 							/////弹出登录页
 							this.QuitFlag = true;
-							this.$ipc.send('system', 'logoff');
+							// this.$ipc.send('system', 'logoff');
 						}
 					});
 				}

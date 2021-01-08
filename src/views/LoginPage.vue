@@ -4,7 +4,7 @@
 			<section>
 				<button type="button" class="sf-icon-cog" v-if="production" @click="OpenServerWindow" />
 				<button type="button" class="sf-icon-window-minimize" @click="mini" />
-				<button type="button" class="sf-icon-times" style="font-size:16px" @click="close" />
+				<button type="button" class="sf-icon-times" style="font-size: 16px" @click="close" />
 			</section>
 		</div>
 		<div class="cd-index-main">
@@ -82,11 +82,12 @@
 				<img draggable="false" src="../assets/img/logo/log.png" alt="" />
 			</div>
 		</div>
+		<!--登录动画-->
 		<div class="cd-index-logining" v-show="LoginSuccess">
 			<ul>
 				<li class="sf-icon-music" />
 				<li class="sf-icon-users" />
-				<li style="width: 180px;">
+				<li style="width: 180px">
 					<img draggable="false" :src="User.head ? User.head + now : normalHead" alt="" />
 					<div class="circle"></div>
 				</li>
@@ -294,15 +295,13 @@ export default {
 					username: username,
 					password: password
 				},
-				rs => {
-					rs = rs[0];
+				res => {
 					// this.PostState = '';
-					if (!rs.state) {
+					if (!res.success) {
 						this.$Message.error('服务器错误');
 						return;
 					}
 					this.LoginSuccess = true;
-					this.User.head = rs.head;
 					this.WindowObject.setSize(800, 300);
 					this.WindowObject.setAlwaysOnTop(false);
 					setTimeout(() => {
@@ -316,15 +315,14 @@ export default {
 						}, 1100);
 					}, 1100);
 				},
-				rs => {
-					rs = rs[0];
+				res => {
 					// this.PostState = '';
-					if (rs.msg === '未激活的用户') {
-						this.$Message.info('请查看您的激活邮箱' + rs.email);
+					if (res.msg === '未激活的用户') {
+						this.$Message.info('请查看您的激活邮箱' + res.email);
 						this.VerifyUserInput.value = username;
 						this.changeType('verify');
 					} else {
-						this.$Message[rs.state](rs.msg);
+						this.$Message[res.success](res.msg);
 					}
 				}
 			);

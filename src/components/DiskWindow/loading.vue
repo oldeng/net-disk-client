@@ -30,6 +30,13 @@ export default {
 		length: {
 			type: Number
 		}
+	},
+	created() {
+		alert('hello');
+		debugger;
+	},
+	mounted() {
+		debugger;
 	}
 };
 </script>

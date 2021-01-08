@@ -104,6 +104,7 @@ export default {
 			}
 		},
 		update() {
+			debugger;
 			let formdata = new FormData(this.$refs.form);
 			this.$Api.User.Update(
 				formdata,
@@ -120,7 +121,7 @@ export default {
 					this.$Message.error({
 						content: '账号状态异常，请重新登录！',
 						onClose: () => {
-							this.$ipc.send('system', 'error');
+							// this.$ipc.send('system', 'error');
 						}
 					});
 				}
