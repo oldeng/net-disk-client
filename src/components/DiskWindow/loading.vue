@@ -31,13 +31,8 @@ export default {
 			type: Number
 		}
 	},
-	created() {
-		alert('hello');
-		debugger;
-	},
-	mounted() {
-		debugger;
-	}
+	created() {},
+	mounted() {}
 };
 </script>
 

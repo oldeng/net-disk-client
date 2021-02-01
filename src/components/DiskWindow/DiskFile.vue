@@ -11,7 +11,7 @@
 			<span class="icon">
 				<img :src="itemIcon(item)" draggable="false" alt="" />
 			</span>
-			<p>{{ item.disk_name }}</p>
+			<p>{{ item.fileName }} {{ spliter(item.extendName) }} {{ item.extendName }}</p>
 			<div class="time">{{ item.create_time || item.modify_time }}</div>
 			<div class="time">{{ item.$size }}</div>
 		</div>
@@ -30,6 +30,9 @@ export default {
 		}
 	},
 	methods: {
+		spliter(extendName) {
+			return extendName ? '.' : '';
+		},
 		select(item, index) {
 			this.$emit('SelectFiles', event, item, index);
 		},

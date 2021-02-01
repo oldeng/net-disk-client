@@ -1,26 +1,26 @@
-import { Ajax, severAddress } from './request';
+import { post, Ajax, severAddress } from './request';
 import LocalFile from './LocalFile';
+import Cookies from 'js-cookie';
+
 export default {
 	Login(data, callback, error) {
-		debugger;
-		Ajax({
-			url: '/user/login',
-			data: data,
-			success: res => {
+		post('/user/login', data)
+			.then(res => {
+				debugger;
 				if (res.success) {
 					LocalFile.init(res.data.userId, () => {
-						// rs[0].head = severAddress() + '/' + rs[0].head + '?' + Date.now();
-						// data.id = rs[0].userid;
 						LocalFile.write('key', res.data.userId);
 						LocalFile.write('login', JSON.parse(JSON.stringify(data)), true);
+						Cookies.set('token', res.data.token);
 						callback && callback(res);
 					});
 				} else {
 					error && error(res);
 				}
-			},
-			error: error
-		});
+			})
+			.catch(err => {
+				error();
+			});
 	},
 	Register(data, callback, error) {
 		Ajax({

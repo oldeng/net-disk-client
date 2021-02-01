@@ -104,7 +104,6 @@ export default {
 			}
 		},
 		update() {
-			debugger;
 			let formdata = new FormData(this.$refs.form);
 			this.$Api.User.Update(
 				formdata,

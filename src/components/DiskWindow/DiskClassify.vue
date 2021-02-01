@@ -55,12 +55,11 @@ export default {
 		return {
 			TypeData: [
 				{ name: '全部文件', icon: 'sf-icon-hdd', data: 'normal', active: 'active' },
-				{ name: '资产', icon: 'sf-icon-image', data: 'assets', active: '' },
-				// { name: '图片', icon: 'sf-icon-image', data: 'picture', active: '' },
-				// { name: '视频', icon: 'sf-icon-video', data: 'video', active: '' },
-				// { name: '文档', icon: 'sf-icon-file-alt', data: 'document', active: '' },
-				// { name: '音乐', icon: 'sf-icon-music', data: 'music', active: '' },
-				// { name: '种子', icon: 'sf-icon-magnet', data: 'torrent', active: '' },
+				{ name: '图片', icon: 'sf-icon-image', data: 'picture', active: '' },
+				{ name: '视频', icon: 'sf-icon-video', data: 'video', active: '' },
+				{ name: '文档', icon: 'sf-icon-file-alt', data: 'document', active: '' },
+				{ name: '音乐', icon: 'sf-icon-music', data: 'music', active: '' },
+				{ name: '种子', icon: 'sf-icon-magnet', data: 'torrent', active: '' },
 				{ name: '其他', icon: 'sf-icon-puzzle-piece', data: 'other', active: '' },
 				{ name: '回收站', icon: 'sf-icon-trash', data: 'trash', active: '' }
 			], //网盘分类参数
@@ -134,7 +133,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 /*左侧头部*/
 .cd-left {
 	float: left;

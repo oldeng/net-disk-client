@@ -4,3 +4,7 @@ msg: "欢迎回来，oldeng"
 state: "success"
 user: "oldeng"
 userid: "E38513C2-746E-8558-27BA-BA36BF739445"
+
+
+#获取文件列表接口
+http://localhost:8080/api/file/getfilelist?filePath=%2F&currentPage=1&pageCount=10

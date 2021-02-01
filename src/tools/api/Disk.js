@@ -69,14 +69,37 @@ export default {
 		});
 	},
 	LoadMainFile(data, callback, error) {
+		let params = new URLSearchParams(data);
 		Ajax({
-			url: '/service/disk/GetMainFile',
+			// url: '/service/disk/GetMainFile',
+			url: `/file/getfilelist?${params.toString()}`,
+			method: 'GET',
+			//filePath=&currentPage=1&pageCount=10
 			data: data,
-			success: rs => {
-				rs.forEach(item => {
-					this.DiskData(item);
-				});
-				callback(rs);
+			success: res => {
+				if (res.success) {
+					res.data.forEach(item => {
+						this.DiskData(item);
+					});
+					callback(res);
+				}
+			},
+			error: error
+		});
+	},
+	LoadFileByType(data, callback, error) {
+		let params = new URLSearchParams(data);
+		Ajax({
+			url: `/file/selectfilebyfiletype?${params.toString()}`,
+			method: 'GET',
+			data: data,
+			success: res => {
+				if (res.success) {
+					res.data.forEach(item => {
+						this.DiskData(item);
+					});
+					callback(res);
+				}
 			},
 			error: error
 		});
@@ -237,20 +260,20 @@ export default {
 	},
 	DiskData(item) {
 		item.active = false; //设置未选择
-		item.$size = this.FileSize(item.disk_size); //计算文件大小
-		item.disk_size = parseInt(item.disk_size);
-		item.disk_main ? (item.disk_main = severAddress() + '/' + item.disk_main) : '';
+		item.$size = this.FileSize(item.fileSize); //计算文件大小
+		item.disk_size = parseInt(item.fileSize);
+		// item.disk_main ? (item.disk_main = severAddress() + '/' + item.disk_main) : '';
 		item.shareAddress = item.share ? severAddress() + '/s/' + item.share : '';
 		item.$icon = 'OtherType.png'; //初始化为其他图标
 		item.OpenType = null; //初始化为无法打开的文件
-		let type = (item.disk_realname || item.disk_main).Before('.').toLowerCase();
+		let type = item.extendName;
 		item.type = type;
-		if (item.disk_main) {
-			for (let i in FileType) {
-				if (type.Exist(FileType[i].TypeArray)) {
-					item.$icon = FileType[i].FileIcon;
-				}
-			}
+		// for (let i in FileType) {
+		// 	if (type.Exist(FileType[i].TypeArray)) {
+		// 		item.$icon = FileType[i].FileIcon;
+		// 	}
+		// }
+		if (type) {
 			if (item.type === 'zip') {
 				item.OpenType = 'zip';
 			} else if (item.type === 'pdf') {

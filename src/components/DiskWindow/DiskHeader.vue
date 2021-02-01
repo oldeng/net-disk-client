@@ -133,7 +133,6 @@ export default {
 			}
 		},
 		GetUserInfo() {
-			debugger;
 			this.$Api.User.UserInfo(
 				rs => {
 					this.$nextTick(() => {

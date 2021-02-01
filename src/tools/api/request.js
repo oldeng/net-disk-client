@@ -1,4 +1,6 @@
 import axios from 'axios/index';
+import Cookies from 'js-cookie';
+
 axios.defaults.withCredentials = true;
 function severAddress() {
 	return 'http://localhost:8090';
@@ -6,6 +8,23 @@ function severAddress() {
 function updateServer() {
 	return 'https://update.zjinh.cn/c-disk';
 }
+
+// 请求拦截器
+axios.interceptors.request.use(
+	config => {
+		if (Cookies.get('token', { domain: '' })) {
+			config.headers['token'] = Cookies.get('token', { domain: '' });
+		} else {
+			config.headers['token'] = Cookies.get('token');
+		}
+		return config;
+	},
+	error => {
+		console.log(error);
+		return Promise.reject(error);
+	}
+);
+
 function Ajax(options) {
 	let params = new URLSearchParams();
 	let method = options.method ? options.method : 'POST';
@@ -32,5 +51,19 @@ function Ajax(options) {
 			options.error && typeof options.error === 'function' ? options.error(error) : '';
 		}
 	);
+}
+
+export function post(url, data = {}, info) {
+	let newData = data;
+	if (info) {
+		//  转formData格式
+		newData = new FormData();
+		for (let i in data) {
+			newData.append(i, data[i]);
+		}
+	}
+	return axios.post(url, newData).then(res => {
+		return res.data;
+	});
 }
 export { Ajax, severAddress, updateServer };

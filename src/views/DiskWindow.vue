@@ -21,7 +21,13 @@
 		<DiskClassify :type="DiskData.Type" :DiskData="DiskData" :show="NoTransType" @callback="SwitchClassify" @change="SwitchClassify" ref="DiskClassify" />
 		<section class="cd-right" v-if="login">
 			<DiskHeader :data="DiskData" :count="DownloadCount + UploadCount" @callback="SwitchType" />
-			<DiskNavigation :data="DiskData" :loading="LoadCompany" :hide="NeedHide" @callback="NavigationControl" @feature="DiskFeatureControl" />
+			<DiskNavigation
+				:data="DiskData"
+				:loading="LoadCompany"
+				:hide="NeedHide"
+				@callback="NavigationControl"
+				@feature="DiskFeatureControl"
+			/>
 			<DiskRecoverBar :show="isTrash" :disabled="UserDiskData.length === 0" @callback="UserDiskData = []" />
 			<DiskSortBar
 				:show="DiskData.DiskShowState !== 'cd-disk-block-file' && NoTransType"
@@ -59,7 +65,7 @@
 				</span>
 			</el-dialog>
 			<el-dialog title="分享方式" :visible.sync="showShare" width="350px" top="150px">
-				<div style="height: 150px;">
+				<div style="height: 150px">
 					<p class="cd-share-select">
 						准备分享<span>{{ DiskData.NowSelect.disk_name }}</span>
 					</p>
@@ -275,7 +281,6 @@ export default {
 		}
 	},
 	created() {
-		alert('主窗口');
 		console.log('主窗口');
 		this.Bind();
 		this.NoticeSrc = localStorage.NoticeVoice;
@@ -312,7 +317,6 @@ export default {
 				false
 			);
 			localStorage.server = this.$Api.Public.severAddress();
-			debugger;
 			this.$ipc.on('download', (e, file, completed) => {
 				completed && this.DiskFeatureControl('popup', file.name + '下载完成'); /*消息提醒*/
 				for (let i = 0; i < this.TransformData.length; i++) {
@@ -330,6 +334,7 @@ export default {
 				});
 			});
 			this.$ipc.on('win-data', (e, data) => {
+				debugger;
 				//接收用户配置文件
 				localStorage.UserId = data.id;
 				this.$Api.User.Login(
@@ -341,6 +346,7 @@ export default {
 							if (data.length) {
 								this.TransformData = data;
 								this.TransformData.forEach(item => {
+									// alert('132');
 									if (item.trans_type === 'download' && item.state !== 'completed') {
 										this.$electron.remote.getCurrentWindow().webContents.downloadURL(item.disk_main + '?disk_name=' + item.disk_name);
 									}
@@ -353,7 +359,8 @@ export default {
 						});
 					},
 					() => {
-						this.$ipc.send('system', 'logoff');
+						// alert('lofogg');
+						// this.$ipc.send('system', 'logoff');
 					}
 				);
 			});
@@ -395,7 +402,8 @@ export default {
 						}
 						this.DiskData.NavData.splice(i, 1);
 					}
-					this.GetMainFile(commend.disk_id, 'normal');
+					debugger;
+					this.GetMainFile(commend.path, 'normal');
 					break;
 			}
 		},
@@ -417,6 +425,7 @@ export default {
 		},
 		/*网盘功能控制*/
 		DiskFeatureControl(commend, datas, flag) {
+			debugger;
 			let data = null;
 			if (commend === 'Copy' || commend === 'Cut') {
 				this.DiskFeatureControl('clear');
@@ -440,11 +449,12 @@ export default {
 			commend = commend ? commend : 'newFolder';
 			switch (commend) {
 				case 'open' /*打开文件夹/文件*/:
+					debugger;
 					let item = datas;
 					if (!item) {
 						item = this.DiskData.NowSelect;
 					}
-					if (!item.disk_main) {
+					if (!item) {
 						this.DiskData.NavData.push(item);
 						this.ClearSelect();
 						this.GetMainFile(item.disk_id, 'normal');
@@ -825,22 +835,13 @@ export default {
 						this.DiskLoadCount = 0;
 					}
 					this.LoadCompany = true;
-					data.forEach(item => {
+					data.data.forEach(item => {
 						this.UserDiskData.push(item);
 					});
 					if (data.length) {
 						this.DiskData.DiskSize.total = data[0].max_size;
 						this.DiskData.DiskSize.use = data[0].use_size;
 						this.DiskData.DiskSize.text = '可用:' + this.$Api.Disk.FileSize(this.DiskData.DiskSize.total - this.DiskData.DiskSize.use);
-						/*let Percent = (this.DiskData.DiskSize.use / this.DiskData.DiskSize.total) * 100;
-                            this.DiskData.DiskSize.Percent = Percent + '%';
-                            if (65 < Percent && Percent < 85) {
-                                this.DiskData.DiskSize.Background = '#f7ab21';
-                            } else if (Percent >= 85) {
-                                this.DiskData.DiskSize.Background = '#e83c3c';
-                            } else {
-                                this.DiskData.DiskSize.Background = '#7c7cee';
-                            }*/
 						this.DiskAllCount = data[0].all_count;
 						this.DiskLoadCount = this.DiskLoadCount + data.length;
 					}
@@ -849,7 +850,7 @@ export default {
 			return BatchData;
 		},
 		/*获取用户文件*/
-		GetMainFile(id, type) {
+		GetMainFile(path, type) {
 			if (this.DiskData.Type === 'trans') {
 				return;
 			}
@@ -857,26 +858,60 @@ export default {
 				this.UserDiskData = []; //清空数据
 				this.LoadCompany = false;
 			}
-			if (!id) {
-				id = 'null';
-			}
 			if (this.loadClassify !== type) {
 				this.DiskLoadCount = 0;
 				this.DiskPage = 1;
 				this.LoadCompany = false;
 			}
-			this.NowDiskID = id;
 			this.loadClassify = type;
-			this.$Api.Disk.LoadMainFile(
-				{
-					id: id,
-					page: this.DiskPage,
-					loadtype: this.loadClassify
-				},
-				rs => {
-					this.DiskBatchData('print', rs);
-				}
-			);
+			// 加载网盘文件
+			if (type === 'normal') {
+				this.$Api.Disk.LoadMainFile(
+					{
+						filePath: path || '/',
+						fileType: this.typeMapping(type),
+						currentPage: 1,
+						pageCount: 10
+					},
+					rs => {
+						this.DiskBatchData('print', rs);
+					}
+				);
+			} else {
+				debugger;
+				this.$Api.Disk.LoadFileByType(
+					{
+						filePath: path || '/',
+						fileType: this.typeMapping(type),
+						currentPage: 1,
+						pageCount: 10
+					},
+					rs => {
+						this.DiskBatchData('print', rs);
+					}
+				);
+			}
+		},
+		typeMapping(typeName) {
+			let type = 0;
+			switch (typeName) {
+				case 'picture':
+					type = 1;
+					break;
+				case 'document':
+					type = 2;
+					break;
+				case 'video':
+					type = 3;
+					break;
+				case 'mp3':
+					type = 4;
+					break;
+				default:
+					// 其他种类
+					type = 5;
+			}
+			return type;
 		},
 		LoadMore() {
 			let elm = event.target;
@@ -891,39 +926,61 @@ export default {
 		SelectFiles(event, item, index) {
 			this.$refs.CloudDiskMain.focus();
 			this.$refs.MouseMenu.MenuShow('file');
-			if (event.button === 0) {
-				event.stopPropagation();
-				if (this.DiskData.KeyFlag === 'Ctrl') {
-					//Ctrl多选
-					item.active = !item.active; //反选
-				} else if (this.DiskData.KeyFlag === 'Shift') {
-					//Shift多选
-					let Start = index,
-						End;
-					item.active = true;
-					if (this.DiskData.NowSelect) {
-						for (let i = 0; i < this.UserDiskData.length; i++) {
-							if (this.UserDiskData[i] === this.DiskData.NowSelect) {
-								Start = i;
-							}
-							if (this.UserDiskData[i] === item) {
-								End = i;
+			if (item.isDir) {
+				// 进入文件夹
+				this.UserDiskData = [];
+				this.$Api.Disk.LoadMainFile(
+					{
+						filePath: item.filePath + item.fileName + '/',
+						fileType: '',
+						currentPage: 1,
+						pageCount: 10
+					},
+					rs => {
+						this.DiskBatchData('print', rs);
+						// 设置navivation
+						this.DiskData.NavData.push({
+							disk_name: item.fileName,
+							path: item.filePath+item.fileName + '/'
+						})
+					}
+				);
+			} else {
+				console.log('打开文件');
+				if (event.button === 0) {
+					event.stopPropagation();
+					if (this.DiskData.KeyFlag === 'Ctrl') {
+						//Ctrl多选
+						item.active = !item.active; //反选
+					} else if (this.DiskData.KeyFlag === 'Shift') {
+						//Shift多选
+						let Start = index,
+							End;
+						item.active = true;
+						if (this.DiskData.NowSelect) {
+							for (let i = 0; i < this.UserDiskData.length; i++) {
+								if (this.UserDiskData[i] === this.DiskData.NowSelect) {
+									Start = i;
+								}
+								if (this.UserDiskData[i] === item) {
+									End = i;
+								}
 							}
 						}
+						for (let j = Math.min(End, Start); j < Math.max(End, Start) + 1; j++) {
+							this.UserDiskData[j].active = true;
+						}
+					} else if (!this.DiskData.KeyFlag) {
+						//单选
+						this.ClearSelect();
+						item.active = true;
+						this.DiskData.NowIndex = index; //记录当前是第几个
+						this.DiskData.NowSelect = item;
 					}
-					for (let j = Math.min(End, Start); j < Math.max(End, Start) + 1; j++) {
-						this.UserDiskData[j].active = true;
-					}
-				} else if (!this.DiskData.KeyFlag) {
-					//单选
-					this.ClearSelect();
-					item.active = true;
-					this.DiskData.NowIndex = index; //记录当前是第几个
+				} else if (event.button === 2) {
+					this.DiskData.NowIndex = index;
 					this.DiskData.NowSelect = item;
 				}
-			} else if (event.button === 2) {
-				this.DiskData.NowIndex = index;
-				this.DiskData.NowSelect = item;
 			}
 		},
 		RemoveSelect(index) {
@@ -1125,8 +1182,11 @@ export default {
 		}
 	},
 	mounted() {
+		console.log('主窗口');
+		this.$nextTick(() => {
+			console.log('主窗口');
+		});
 		setTimeout(() => {
-			alert('主窗口');
 			console.log('主窗口');
 		}, 1000);
 	}

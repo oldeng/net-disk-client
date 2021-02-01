@@ -18,7 +18,7 @@
 				type="text"
 				placeholder="搜索"
 				v-model="SearchKey"
-				@keyup.enter.native="SwitchSearch"
+				@keyup.enter="SwitchSearch"
 				:style="ShowSearch ? { width: '170px', border: '1px solid #eee' } : ''"
 			/>
 			<button class="sf-icon-search" @click="SwitchSearch" v-show="data.Type === 'disk'" />
@@ -48,6 +48,12 @@ export default {
 				if (this.hide) {
 					this.ShowSearch = !this.hide;
 				}
+			},
+			deep: true
+		},
+		data: {
+			handler() {
+				console.log('data', this.data);
 			},
 			deep: true
 		}
