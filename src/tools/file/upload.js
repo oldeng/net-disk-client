@@ -184,20 +184,21 @@ export default {
 		const chunkSize = 1 * 1024 * 1024;
 
 		function loadNext() {
-
+			let start = currentChunk * chunkSize;
+			let end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+			return blobSlice.call(file, start, end);
 		}
-		
+		let chunk = loadNext();
 		if (currentChunk < chunks) {
-			let chunk = e.target.result;
 			console.log('上传chunk', currentChunk + 1, chunk);
 			currentChunk++;
 			if (task < 9) {
-				loadNext();
+				chunk = loadNext();
 			}
 			this.uploadChunk({
 				chunkNumber: currentChunk,
 				chunkSize: chunkSize,
-				currentChunkSize: chunk.byteLength,
+				currentChunkSize: chunk.size,
 				totalSize: file.size,
 				identifier: md5,
 				filename: file.name,
@@ -220,7 +221,7 @@ export default {
 			fileReader.abort();
 		}
 
-
+     
 	},
 	uploadChunk(chunk) {
 		return new Promise((resolve, reject) => {
@@ -235,7 +236,7 @@ export default {
 			form.append('totalChunks', chunk.totalChunks);
 			form.append('filePath', chunk.filePath);
 			form.append('isDir', chunk.isDir);
-			form.append('file', new Blob(chunk.file));
+			form.append('file', chunk.file);
 			debugger;
 			Disk.Upload(
 				form,
