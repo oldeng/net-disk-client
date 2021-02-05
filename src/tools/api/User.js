@@ -6,7 +6,6 @@ export default {
 	Login(data, callback, error) {
 		post('/user/login', data)
 			.then(res => {
-				debugger;
 				if (res.success) {
 					LocalFile.init(res.data.userId, () => {
 						LocalFile.write('key', res.data.userId);

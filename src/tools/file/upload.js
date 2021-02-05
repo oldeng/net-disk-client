@@ -1,43 +1,54 @@
 import Disk from '../api/Disk';
+import SparkMD5 from 'spark-md5';
+
+let task = 0;
+
 export default {
 	needChunkSize: 1048576,
 	selectUploadFiles: [],
 	uploadHistory: [],
 	prepareFile(data, options) {
-		if (data.target) {
-			data = data.target;
-		}
-		for (let k = 0; k < data.files.length; k++) {
-			this.selectUploadFiles.push(data.files[k]);
-		}
-		let fileArea = data.files;
-		let file;
-		let OneFile = {};
-		for (let i = 0; i < fileArea.length; i++) {
-			file = fileArea[i];
-			OneFile = {
-				time: new Date().getTime() / 1000,
-				name: file.name,
-				chunk: 0,
-				size: file.size,
-				trans_type: 'upload',
-				state: 'progressing',
-				disk_main: file.path,
-				NowDiskID: options.data,
-				shows: false
-			};
-			for (let j = 0; j < this.uploadHistory.length; j++) {
-				let item = this.uploadHistory[j];
-				if (item.name === OneFile.name && item.chunk !== 0 && item.disk_main === OneFile.disk_main && item.state !== 'completed') {
-					item.state = 'progressing';
-					this.postUploadData(item, null, options.success);
-					return false;
-				}
-			}
-			this.uploadHistory.push(OneFile);
-			options.add && options.add(OneFile);
-			this.postUploadData(OneFile, 'first', options.success);
-		}
+		let files = data.target.files;
+		// 先发送get请求上传文件信息和chunk信息
+		this.computeMD5(files[0])
+			.then(async ({ md5, file, chunks }) => {
+				console.log(md5, file, chunks);
+				console.log('计算md5后');
+
+				await Disk.UploadInfo(
+					{
+						chunkNumber: 1,
+						chunkSize: 0,
+						currentChunkSize: 0,
+						totalSize: file.size,
+						identifier: md5,
+						filename: file.name,
+						relativePath: file.name,
+						totalChunks: 1,
+						filePath: '/',
+						isDir: 0
+					},
+					res => {
+						// 成功
+						console.log('res->', res);
+						let data = res.data;
+						if (!data.skipUpload) {
+							// 上传分片
+							this.computeMD5Success(md5, file, chunks);
+						} else {
+							console.log('秒传成功');
+						}
+					},
+					err => {
+						// 失败
+						console.log(err);
+					}
+				);
+				// 开始传文件
+			})
+			.catch(err => {
+				console.log(err);
+			});
 	},
 	chunkFileData(item, times) {
 		console.log(totalSize > this.needChunkSize);
@@ -117,5 +128,125 @@ export default {
 			}
 		}
 		callback(item, rs);
+	},
+	// 计算文件MD5值
+	computeMD5(file) {
+		return new Promise((resolve, reject) => {
+			let fileReader = new FileReader();
+			let time = new Date().getTime();
+			let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+			let currentChunk = 0;
+			const chunkSize = 1 * 1024 * 1024;
+			let chunks = Math.ceil(file.size / chunkSize);
+			let spark = new SparkMD5.ArrayBuffer();
+			let chunkArr = [];
+			// 文件状态设为"计算MD5"
+			loadNext();
+
+			fileReader.onload = e => {
+				spark.append(e.target.result);
+				chunkArr.push(e.target.result);
+				if (currentChunk < chunks) {
+					currentChunk++;
+					loadNext();
+					// 实时展示MD5的计算进度
+					console.log('校验MD5 ' + ((currentChunk / chunks) * 100).toFixed(0) + '%');
+				} else {
+					let md5 = spark.end();
+					// this.computeMD5Success(md5, file, chunks);
+					console.log(`MD5计算完毕：${file.name} \nMD5：${md5} \n分片：${chunks} 大小:${file.size} 用时：${new Date().getTime() - time} ms`);
+					fileReader.abort();
+					resolve({
+						md5,
+						file,
+						chunks
+					});
+				}
+			};
+
+			fileReader.onerror = function() {
+				this.error(`文件${file.name}读取出错，请检查该文件`);
+				file.cancel();
+				fileReader.abort();
+				reject();
+			};
+
+			function loadNext() {
+				let start = currentChunk * chunkSize;
+				let end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+				fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
+			}
+		});
+	},
+	computeMD5Success(md5, file, chunks) {
+		let blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+		let currentChunk = 0;
+		const chunkSize = 1 * 1024 * 1024;
+
+		function loadNext() {
+
+		}
+		
+		if (currentChunk < chunks) {
+			let chunk = e.target.result;
+			console.log('上传chunk', currentChunk + 1, chunk);
+			currentChunk++;
+			if (task < 9) {
+				loadNext();
+			}
+			this.uploadChunk({
+				chunkNumber: currentChunk,
+				chunkSize: chunkSize,
+				currentChunkSize: chunk.byteLength,
+				totalSize: file.size,
+				identifier: md5,
+				filename: file.name,
+				relativePath: file.name,
+				totalChunks: chunks,
+				filePath: '/',
+				isDir: 0,
+				file: chunk
+			})
+				.then(() => {
+					task--;
+					loadNext();
+				})
+				.catch(err => {
+					task--;
+					loadNext();
+				});
+			task++;
+		} else {
+			fileReader.abort();
+		}
+
+
+	},
+	uploadChunk(chunk) {
+		return new Promise((resolve, reject) => {
+			let form = new FormData();
+			form.append('chunkNumber', chunk.chunkNumber);
+			form.append('chunkSize', chunk.chunkSize);
+			form.append('currentChunkSize', chunk.currentChunkSize);
+			form.append('totalSize', chunk.totalSize);
+			form.append('identifier', chunk.identifier);
+			form.append('filename', chunk.filename);
+			form.append('relativePath', chunk.relativePath);
+			form.append('totalChunks', chunk.totalChunks);
+			form.append('filePath', chunk.filePath);
+			form.append('isDir', chunk.isDir);
+			form.append('file', new Blob(chunk.file));
+			debugger;
+			Disk.Upload(
+				form,
+				res => {
+					resolve('');
+				},
+				() => {
+					alert('上传失败');
+					reject();
+				}
+			);
+		});
 	}
 };

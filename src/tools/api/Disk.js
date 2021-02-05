@@ -239,13 +239,28 @@ export default {
 		});
 	},
 	Upload(data, callback, error) {
+		debugger
 		Ajax({
-			url: '/service/disk/upload',
+			url: '/filetransfer/uploadfile',
 			data: data,
 			upload: true,
 			success: rs => {
 				rs.data ? this.DiskData(rs.data) : '';
 				callback(rs);
+			},
+			error: error
+		});
+	},
+	UploadInfo(data, callback, error) {
+		let params = new URLSearchParams(data);
+		Ajax({
+			url: `/filetransfer/uploadfile?${params.toString()}`,
+			data: data,
+			method: 'get',
+			upload: true,
+			success: res => {
+				res.data ? this.DiskData(res.data) : '';
+				callback(res);
 			},
 			error: error
 		});
@@ -268,12 +283,13 @@ export default {
 		item.OpenType = null; //初始化为无法打开的文件
 		let type = item.extendName;
 		item.type = type;
-		// for (let i in FileType) {
-		// 	if (type.Exist(FileType[i].TypeArray)) {
-		// 		item.$icon = FileType[i].FileIcon;
-		// 	}
-		// }
 		if (type) {
+			// 给文件添加图标
+			for (let i in FileType) {
+				if (type.Exist(FileType[i].TypeArray)) {
+					item.$icon = FileType[i].FileIcon;
+				}
+			}
 			if (item.type === 'zip') {
 				item.OpenType = 'zip';
 			} else if (item.type === 'pdf') {
@@ -281,8 +297,8 @@ export default {
 			} else if (item.type.Exist('apng,png,jpg,jpeg,bmp,gif')) {
 				item.TypeArray = 'apng,png,jpg,jpeg,bmp,gif';
 				item.OpenType = 'image';
-			} else if (item.type.Exist('mp4,rmvb,mkv')) {
-				item.TypeArray = 'mp4,rmvb,mkv';
+			} else if (item.type.Exist('flv,mp4,rmvb,mkv')) {
+				item.TypeArray = 'mp4,rmvb,mkv,flv';
 				item.OpenType = 'video';
 			} else if (item.type.Exist('m4a,mp3,ogg,flac,f4a,wav,ape')) {
 				item.TypeArray = 'm4a,mp3,ogg,flac,f4a,wav,ape';

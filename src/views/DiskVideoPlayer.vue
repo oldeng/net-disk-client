@@ -24,7 +24,7 @@
 				@durationchange="PlayButtonState = 'sf-icon-pause'"
 				@seeking="PlayButtonState = 'sf-icon-circle-notch sf-spin'"
 				@canplay="VideoPlayerCommend('play')"
-				:src="NowPlay.PlayUrl"
+				:src="getUrl()"
 			/>
 			<div :class="'cd-video-fliter ' + PlayButtonState + ' ' + animation" @click="VideoPlayerCommend('play')"></div>
 			<div :class="'cd-video-control ' + BarAnimation" @mouseover="ShowControl" @mouseout="HideControl">
@@ -119,6 +119,10 @@ export default {
 		this.bind();
 	},
 	methods: {
+		getUrl() {
+			console.log('this.NowShow.fileUrl', this.NowPlay.fileUrl);
+			return `http://localhost:8081/api${this.NowPlay.fileUrl}`;
+		},
 		bind() {
 			this.$ipc.on('video-prev', () => {
 				this.VideoPlayerCommend('prev');
@@ -133,7 +137,6 @@ export default {
 		playCallBack(item, index) {
 			this.NowPlay = item;
 			this.NowPlay.count = index;
-			this.NowPlay.PlayUrl = item.disk_main;
 		},
 		ChangeTime(state) {
 			let media = this.$refs.video;
@@ -169,20 +172,22 @@ export default {
 					}
 					break;
 				case 'play':
-					let media = this.$refs.video;
-					if (media.paused) {
-						media.play();
-						this.PlayButtonState = 'sf-icon-pause';
-						this.animation = 'animated zoomOut';
-						this.$ipc.send('player-control', 'video', 'pause');
-					} else {
-						media.pause();
-						this.PlayButtonState = 'sf-icon-play';
-						this.animation = 'animated zoomIn';
-						this.$ipc.send('player-control', 'video', 'play');
-					}
-					this.header.title = this.NowPlay.disk_name;
-					this.$refs.VideoPlayer.focus();
+					this.$nextTick(() => {
+						let media = this.$refs.video;
+						if (media.paused) {
+							media.play();
+							this.PlayButtonState = 'sf-icon-pause';
+							this.animation = 'animated zoomOut';
+							this.$ipc.send('player-control', 'video', 'pause');
+						} else {
+							media.pause();
+							this.PlayButtonState = 'sf-icon-play';
+							this.animation = 'animated zoomIn';
+							this.$ipc.send('player-control', 'video', 'play');
+						}
+						this.header.title = this.NowPlay.disk_name;
+						this.$refs.VideoPlayer.focus();
+					});
 					break;
 			}
 		},

@@ -21,13 +21,7 @@
 		<DiskClassify :type="DiskData.Type" :DiskData="DiskData" :show="NoTransType" @callback="SwitchClassify" @change="SwitchClassify" ref="DiskClassify" />
 		<section class="cd-right" v-if="login">
 			<DiskHeader :data="DiskData" :count="DownloadCount + UploadCount" @callback="SwitchType" />
-			<DiskNavigation
-				:data="DiskData"
-				:loading="LoadCompany"
-				:hide="NeedHide"
-				@callback="NavigationControl"
-				@feature="DiskFeatureControl"
-			/>
+			<DiskNavigation :data="DiskData" :loading="LoadCompany" :hide="NeedHide" @callback="NavigationControl" @feature="DiskFeatureControl" />
 			<DiskRecoverBar :show="isTrash" :disabled="UserDiskData.length === 0" @callback="UserDiskData = []" />
 			<DiskSortBar
 				:show="DiskData.DiskShowState !== 'cd-disk-block-file' && NoTransType"
@@ -334,7 +328,6 @@ export default {
 				});
 			});
 			this.$ipc.on('win-data', (e, data) => {
-				debugger;
 				//接收用户配置文件
 				localStorage.UserId = data.id;
 				this.$Api.User.Login(
@@ -402,7 +395,6 @@ export default {
 						}
 						this.DiskData.NavData.splice(i, 1);
 					}
-					debugger;
 					this.GetMainFile(commend.path, 'normal');
 					break;
 			}
@@ -425,7 +417,6 @@ export default {
 		},
 		/*网盘功能控制*/
 		DiskFeatureControl(commend, datas, flag) {
-			debugger;
 			let data = null;
 			if (commend === 'Copy' || commend === 'Cut') {
 				this.DiskFeatureControl('clear');
@@ -449,7 +440,6 @@ export default {
 			commend = commend ? commend : 'newFolder';
 			switch (commend) {
 				case 'open' /*打开文件夹/文件*/:
-					debugger;
 					let item = datas;
 					if (!item) {
 						item = this.DiskData.NowSelect;
@@ -878,7 +868,6 @@ export default {
 					}
 				);
 			} else {
-				debugger;
 				this.$Api.Disk.LoadFileByType(
 					{
 						filePath: path || '/',
@@ -904,12 +893,15 @@ export default {
 				case 'video':
 					type = 3;
 					break;
-				case 'mp3':
+				case 'music':
 					type = 4;
+					break;
+				case 'torrent':
+					type = 5;
 					break;
 				default:
 					// 其他种类
-					type = 5;
+					type = 6;
 			}
 			return type;
 		},
@@ -941,8 +933,8 @@ export default {
 						// 设置navivation
 						this.DiskData.NavData.push({
 							disk_name: item.fileName,
-							path: item.filePath+item.fileName + '/'
-						})
+							path: item.filePath + item.fileName + '/'
+						});
 					}
 				);
 			} else {
@@ -1017,20 +1009,21 @@ export default {
 				this.ShowUploadTips = false;
 			}
 		}, //拖拽上传
-		PrepareUploadFile(data) {
-			upload.prepareFile(data, {
-				data: this.NowDiskID,
-				add: file => {
-					this.TransformData.push(file);
-					this.$Message.info((data.target ? data.target : data).files.length + '个文件已加入上传列队');
-				},
-				success: (file, rs) => {
-					if (this.NowDiskID === rs.data.parent_id) {
-						this.UserDiskData.push(rs.data);
-					}
-					this.DiskFeatureControl('popup', file.name + '上传完成'); /*消息提醒*/
-				}
-			});
+		PrepareUploadFile(event) {
+			upload.prepareFile(event);
+			// upload.prepareFile(data, {
+			// 	data: this.NowDiskID,
+			// 	add: file => {
+			// 		this.TransformData.push(file);
+			// 		this.$Message.info((data.target ? data.target : data).files.length + '个文件已加入上传列队');
+			// 	},
+			// 	success: (file, rs) => {
+			// 		if (this.NowDiskID === rs.data.parent_id) {
+			// 			this.UserDiskData.push(rs.data);
+			// 		}
+			// 		this.DiskFeatureControl('popup', file.name + '上传完成'); /*消息提醒*/
+			// 	}
+			// });
 		},
 		DiskUnZip() {
 			if (!this.SelectTrees) {

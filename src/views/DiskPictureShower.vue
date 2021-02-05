@@ -5,7 +5,7 @@
 			<span class="cd-image-zoom" :style="{ opacity: ZoomWin }">{{ ZoomPercent }}</span
 			>{{ NowShow.count + 1 }}/{{ PhotoList.length }}
 		</p>
-		<img :class="'cd-image-show ' + (!Control ? 'cd-image-animated' : '')" :src="NowShow.URL" ref="imageShow" @load="onload" @mousedown="Drag" alt="" />
+		<img :class="'cd-image-show ' + (!Control ? 'cd-image-animated' : '')" :src="url" ref="imageShow" @load="onload" @mousedown="Drag" alt="" />
 		<Spin v-show="loaded">
 			<Icon type="ios-loading" size="26" class="loading" />
 		</Spin>
@@ -46,6 +46,11 @@ export default {
 				color: '#fff'
 			}
 		};
+	},
+	computed: {
+		url() {
+			return `http://localhost:8081/api${this.NowShow.fileUrl}`;
+		}
 	},
 	watch: {
 		PhotoList: {
@@ -113,7 +118,6 @@ export default {
 		ShowPicture(item, index) {
 			this.NowShow = item;
 			this.NowShow.count = index;
-			this.NowShow.URL = item.disk_main;
 			this.header.title = item.disk_name + '-图片查看';
 		},
 		orginz() {
