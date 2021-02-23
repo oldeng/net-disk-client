@@ -19,6 +19,18 @@ module.exports = {
 		proxy: {
 			'/user/login': {
 				target: 'http://localhost:8090'
+			},
+			'/filetransfer/uploadfile': {
+				target: 'http://localhost:8090'
+			},
+			'/filetransfer/uploadfile': {
+				target: 'http://localhost:8090'
+			},
+			'/api/upload/*': {
+				target: 'http://localhost:8090',
+				pathRewrite: {
+					'^/api': '/'
+				}
 			}
 		}
 		//   open: true,

@@ -12,14 +12,14 @@ export default {
 		// 先发送get请求上传文件信息和chunk信息
 		this.computeMD5(files[0])
 			.then(async ({ md5, file, chunks }) => {
+				debugger;
 				console.log(md5, file, chunks);
 				console.log('计算md5后');
-
 				await Disk.UploadInfo(
 					{
-						chunkNumber: 1,
-						chunkSize: 0,
-						currentChunkSize: 0,
+						chunkNumber: chunks,
+						chunkSize: 1048576,
+						currentChunkSize: file.size,
 						totalSize: file.size,
 						identifier: md5,
 						filename: file.name,
@@ -188,40 +188,41 @@ export default {
 			let end = start + chunkSize >= file.size ? file.size : start + chunkSize;
 			return blobSlice.call(file, start, end);
 		}
-		let chunk = loadNext();
-		if (currentChunk < chunks) {
-			console.log('上传chunk', currentChunk + 1, chunk);
-			currentChunk++;
-			if (task < 9) {
-				chunk = loadNext();
-			}
-			this.uploadChunk({
-				chunkNumber: currentChunk,
-				chunkSize: chunkSize,
-				currentChunkSize: chunk.size,
-				totalSize: file.size,
-				identifier: md5,
-				filename: file.name,
-				relativePath: file.name,
-				totalChunks: chunks,
-				filePath: '/',
-				isDir: 0,
-				file: chunk
-			})
-				.then(() => {
-					task--;
-					loadNext();
+		for (let i = 0; i < chunks; i++) {
+			let chunk = loadNext();
+			if (currentChunk < chunks) {
+				console.log('上传chunk', currentChunk + 1, chunk);
+				debugger;
+				this.uploadChunk({
+					chunkNumber: currentChunk + 1,
+					chunkSize: chunkSize,
+					currentChunkSize: chunk.size,
+					totalSize: file.size,
+					identifier: md5,
+					filename: file.name,
+					relativePath: file.name,
+					totalChunks: chunks,
+					filePath: '/',
+					isDir: 0,
+					file: chunk
 				})
-				.catch(err => {
-					task--;
-					loadNext();
-				});
-			task++;
-		} else {
-			fileReader.abort();
+					.then(() => {
+						task--;
+						loadNext();
+						currentChunk++;
+						if (task < 9) {
+							chunk = loadNext();
+						}
+					})
+					.catch(err => {
+						task--;
+						loadNext();
+					});
+				task++;
+			} else {
+				fileReader.abort();
+			}
 		}
-
-     
 	},
 	uploadChunk(chunk) {
 		return new Promise((resolve, reject) => {
@@ -237,7 +238,6 @@ export default {
 			form.append('filePath', chunk.filePath);
 			form.append('isDir', chunk.isDir);
 			form.append('file', chunk.file);
-			debugger;
 			Disk.Upload(
 				form,
 				res => {

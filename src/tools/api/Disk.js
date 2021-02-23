@@ -239,7 +239,7 @@ export default {
 		});
 	},
 	Upload(data, callback, error) {
-		debugger
+		debugger;
 		Ajax({
 			url: '/filetransfer/uploadfile',
 			data: data,

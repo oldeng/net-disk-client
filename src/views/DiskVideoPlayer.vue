@@ -11,7 +11,8 @@
 	>
 		<WindowsHeader :data="header" />
 		<div class="cd-video-main">
-			<video
+			<div
+				id="player"
 				:style="{ height: VideoHeight }"
 				crossorigin="*"
 				@error="VideoError"
@@ -24,10 +25,9 @@
 				@durationchange="PlayButtonState = 'sf-icon-pause'"
 				@seeking="PlayButtonState = 'sf-icon-circle-notch sf-spin'"
 				@canplay="VideoPlayerCommend('play')"
-				:src="getUrl()"
-			/>
-			<div :class="'cd-video-fliter ' + PlayButtonState + ' ' + animation" @click="VideoPlayerCommend('play')"></div>
-			<div :class="'cd-video-control ' + BarAnimation" @mouseover="ShowControl" @mouseout="HideControl">
+			></div>
+			<!-- <div :class="'cd-video-fliter ' + PlayButtonState + ' ' + animation" @click="VideoPlayerCommend('play')"></div> -->
+			<!-- <div :class="'cd-video-control ' + BarAnimation" @mouseover="ShowControl" @mouseout="HideControl">
 				<div :class="'cd-video-play ' + PlayButtonState" @click="VideoPlayerCommend('play')"></div>
 				<div class="cd-video-player-slider-container" @mousedown="TimeChange" ref="slider">
 					<div class="cd-player-process-bar" :style="{ width: ProcessWidth }">
@@ -48,7 +48,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </template>
@@ -56,6 +56,10 @@
 <script>
 import Media from '../tools/media/media';
 import WindowsHeader from '../components/DiskWindow/WindowHeader';
+import Player from 'xgplayer/dist/simple_player';
+import FlvPlayer from 'xgplayer-flv';
+import { volume, playbackRate } from 'xgplayer/dist/controls';
+
 export default {
 	name: 'DiskVideoPlayer',
 	components: { WindowsHeader },
@@ -75,15 +79,15 @@ export default {
 					this.VideoHeight = 'calc(100% - 70px)';
 					this.FullButton = 'sf-icon-expand';
 				}
-			}
-		}
+			},
+		},
 	},
 	data() {
 		return {
 			PlayList: [],
 			NowPlay: {
 				disk_name: '准备播放',
-				count: 0
+				count: 0,
 			},
 			TimeText: '00:00/00:00',
 			ProcessWidth: 0,
@@ -97,12 +101,13 @@ export default {
 			FullButton: 'sf-icon-expand',
 			TimeOutID: 0,
 			header: {
-				title: ''
-			}
+				title: '',
+			},
 		};
 	},
 	created() {
 		this.$ipc.on('win-data', (event, data) => {
+			debugger;
 			//接收打开视频文件的数据
 			this.$nextTick(() => {
 				data.forEach((item, index) => {
@@ -113,15 +118,50 @@ export default {
 						this.VideoPlayerCommend('play');
 					}
 				});
-				this.PlayList = data;
+				let player = new FlvPlayer({
+					id: 'player',
+					url: this.getUrl(),
+					volume: 0.6,
+					danmu: {
+						comments: [
+							{
+								duration: 15000,
+								id: '1',
+								start: 3000,
+								txt: '长弹幕长弹幕长弹幕长弹幕长弹幕',
+								style: {
+									//弹幕自定义样式
+									color: '#ff9500',
+									fontSize: '20px',
+									border: 'solid 1px #ff9500',
+									borderRadius: '50px',
+									padding: '5px 11px',
+									backgroundColor: 'rgba(255, 255, 255, 0.1)',
+								},
+							},
+						],
+						area: {
+							start: 0,
+							end: 1,
+						},
+					},
+					playsinline: true,
+					height: window.innerHeight-100,
+					width: window.innerWidth,
+				});
+				player.emit('resourceReady', [
+					{ name: '超清', url: '//sf1-hscdn-tos.pstatp.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-720p.flv' },
+					{ name: '高清', url: '//sf1-hscdn-tos.pstatp.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-480p.flv' },
+					{ name: '标清', url: '//sf1-hscdn-tos.pstatp.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-360p.flv' },
+				]);
+				// this.PlayList = data;
 			});
 		});
 		this.bind();
 	},
 	methods: {
 		getUrl() {
-			console.log('this.NowShow.fileUrl', this.NowPlay.fileUrl);
-			return `http://localhost:8081/api${this.NowPlay.fileUrl}`;
+			return `/api${this.NowPlay.fileUrl}`;
 		},
 		bind() {
 			this.$ipc.on('video-prev', () => {
@@ -155,7 +195,7 @@ export default {
 			switch (commend) {
 				case 'prev':
 					if (NowCount !== 0) {
-						this.PlayList.forEach(item => {
+						this.PlayList.forEach((item) => {
 							item.play = false;
 						});
 						this.PlayList[NowCount - 1].play = 'active';
@@ -163,7 +203,7 @@ export default {
 					break;
 				case 'next':
 					if (NowCount !== AllCount - 1) {
-						this.PlayList.forEach(item => {
+						this.PlayList.forEach((item) => {
 							item.play = false;
 						});
 						this.PlayList[NowCount + 1].play = 'active';
@@ -175,12 +215,10 @@ export default {
 					this.$nextTick(() => {
 						let media = this.$refs.video;
 						if (media.paused) {
-							media.play();
 							this.PlayButtonState = 'sf-icon-pause';
 							this.animation = 'animated zoomOut';
 							this.$ipc.send('player-control', 'video', 'pause');
 						} else {
-							media.pause();
 							this.PlayButtonState = 'sf-icon-play';
 							this.animation = 'animated zoomIn';
 							this.$ipc.send('player-control', 'video', 'play');
@@ -220,6 +258,7 @@ export default {
 		},
 		ShowControl() {
 			this.$refs.VideoPlayer.focus();
+			debugger;
 			if (this.FullFlag) {
 				this.BarAnimation = 'animated slideInUp';
 				this.VideoHeight = 'calc(100% - 70px)';
@@ -276,11 +315,14 @@ export default {
 		},
 		VideoError(e) {
 			this.$Message.error(e);
-		}
-	}
+		},
+	},
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 @import url('../assets/css/player.css');
+.player {
+	border: 1px solid red;
+}
 </style>

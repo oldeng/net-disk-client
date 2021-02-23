@@ -49,7 +49,7 @@ export default {
 	},
 	computed: {
 		url() {
-			return `http://localhost:8081/api${this.NowShow.fileUrl}`;
+			return `/api${this.NowShow.fileUrl}`;
 		}
 	},
 	watch: {

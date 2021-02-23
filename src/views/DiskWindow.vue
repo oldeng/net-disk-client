@@ -71,6 +71,7 @@
 				</span>
 			</el-dialog>
 		</section>
+		<global-uploader ref="global-upload"></global-uploader>
 	</section>
 </template>
 
@@ -87,6 +88,8 @@ import DiskTransList from '../components/DiskWindow/DiskTransList'; //下载列�
 import loading from '../components/DiskWindow/loading'; //加载
 import MouseMenu from '../components/DiskWindow/MouseMenu'; //右键菜单
 import upload from '../tools/file/upload';
+import GlobalUploader from '../components/Global/Uploader';
+
 export default {
 	name: 'DiskWindow',
 	components: {
@@ -100,7 +103,8 @@ export default {
 		DiskShare,
 		DiskTransList,
 		loading,
-		MouseMenu
+		MouseMenu,
+		GlobalUploader
 	},
 	data() {
 		return {
@@ -469,12 +473,15 @@ export default {
 					}
 					break;
 				case 'upload': //上传文件
-					this.$refs.FileArea.value = '';
-					this.$refs.FileArea.click();
-					if (datas) {
-						this.PrepareUploadFile(datas.dataTransfer);
-						this.ShowUploadTips = false;
-					}
+					// this.$refs.FileArea.value = '';
+					// this.$refs.FileArea.click();
+					// if (datas) {
+					// 	this.PrepareUploadFile(datas.dataTransfer);
+					// 	this.ShowUploadTips = false;
+					// }
+					// 触发全局上传组件
+					this.$Message.warning('触发全局上传组件');
+					this.$EventBus.$emit('openUploader', '');
 					break;
 				case 'download': //下载文件
 					if (this.DiskData.SelectFiles.length) {

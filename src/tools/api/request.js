@@ -54,15 +54,33 @@ function Ajax(options) {
 }
 
 export function post(url, data = {}, info) {
-	let newData = data;
-	if (info) {
-		//  转formData格式
-		newData = new FormData();
-		for (let i in data) {
-			newData.append(i, data[i]);
+	// let newData = data;
+	// if (info) {
+	// 	//  转formData格式
+	// 	newData = new FormData();
+	// 	for (let i in data) {
+	// 		newData.append(i, data[i]);
+	// 	}
+	// }
+	// return axios.post(url, newData).then(res => {
+	// 	return res.data;
+	// });
+	const instance = axios.create();
+	const options = Object.assign(
+		{
+			headers: {
+				'content-type': 'application/json',
+				token: Cookies.get('token')
+			}
+		},
+		{
+			url: url,
+			method: 'post',
+			data: data
 		}
-	}
-	return axios.post(url, newData).then(res => {
+	);
+	return instance(options).then(res => {
+		console.log('res', res);
 		return res.data;
 	});
 }
