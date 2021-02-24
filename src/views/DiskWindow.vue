@@ -668,6 +668,26 @@ export default {
 						}
 					});
 					break;
+				// 删除回收站文件
+				case 'delete-recovery':
+					let delete_data = this.DiskBatchData();
+					data = this.DiskBatchData('post', delete_data);
+					this.Confrim({
+						title: '删除',
+						tips: '是否将所选' + delete_data.length + '个文件彻底删除',
+						callback: () => {
+							this.$Api.Disk.DelRecoverFile(data, 							rs => {
+								rs = rs[0];
+								if (rs.state === 'success') {
+									this.$Message.success('删除成功');
+									this.DiskBatchData('remove', delete_data);
+								} else {
+									this.$Message.success('删除失败');
+								}
+							});
+						}
+					})
+					break;
 				case 'restore': //文件还原
 					let restore_data = this.DiskBatchData();
 					data = this.DiskBatchData('post', restore_data);
@@ -874,6 +894,12 @@ export default {
 						this.DiskBatchData('print', rs);
 					}
 				);
+			} else if (type === 'trash') {
+				// 加载回收站
+				this.$Api.Disk.LoadTrash({}, res => {
+					debugger
+					this.DiskBatchData('print', res);
+				})
 			} else {
 				this.$Api.Disk.LoadFileByType(
 					{

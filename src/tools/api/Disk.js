@@ -104,6 +104,42 @@ export default {
 			error: error
 		});
 	},
+	// 加载回收站
+	LoadTrash(data, callback, error) {
+		let params = new URLSearchParams(data);
+		Ajax({
+			url: `/recoveryfile/list?${params.toString()}`,
+			method: 'Post',
+			data: data,
+			success: res => {
+				if (res.success) {
+					res.data.forEach(item => {
+						this.DiskData(item);
+					});
+					callback(res);
+				}
+			},
+			error: error
+		});
+	},
+	// 删除回收站文件
+	DelRecoverFile(data, callback, error) {
+		let params = new URLSearchParams(data);
+		Ajax({
+			url: `/recoveryfile/deleterecoveryfile?${params.toString()}`,
+			method: 'Post',
+			data: data,
+			success: res => {
+				if (res.success) {
+					res.data.forEach(item => {
+						this.DiskData(item);
+					});
+					callback(res);
+				}
+			},
+			error: error
+		});
+	},
 	UnZip(data, callback, error) {
 		Ajax({
 			url: '/service/disk/UnZipFile',

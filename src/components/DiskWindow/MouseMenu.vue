@@ -44,7 +44,7 @@ export default {
 			],
 			TrashFileMenu: [
 				{ name: '还原', key: 'Ctrl+R', commend: 'restore', data: '' },
-				{ name: '删除', key: 'Ctrl+Del', commend: 'delete', data: '' },
+				{ name: '删除', key: 'Ctrl+Del', commend: 'delete-recovery', data: '' },
 				{ name: '属性', key: 'Alt+Enter', commend: 'info', data: '', disabled: 'SelectFiles.length>1' }
 			],
 			DiskShareMenu: [
