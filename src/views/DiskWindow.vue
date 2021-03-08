@@ -104,7 +104,7 @@ export default {
 		DiskTransList,
 		loading,
 		MouseMenu,
-		GlobalUploader
+		GlobalUploader,
 	},
 	data() {
 		return {
@@ -125,8 +125,8 @@ export default {
 					use: 0,
 					Percent: '0%',
 					Background: '#2682fc',
-					text: '0B/0B'
-				}
+					text: '0B/0B',
+				},
 			},
 			UserDiskData: [], //存放用户网盘数据
 			DiskPage: 1, //网盘加载的页数
@@ -150,7 +150,7 @@ export default {
 				left: 0,
 				top: 0,
 				width: 0,
-				height: 0
+				height: 0,
 			},
 			/*上传提示*/
 			ShowUploadTips: false,
@@ -163,10 +163,10 @@ export default {
 			NoticeSrc: '',
 			ConfigObject: {
 				NoticeFlag: true,
-				NoticeBubble: true
+				NoticeBubble: true,
 			},
 			login: true,
-			UserInfo: {}
+			UserInfo: {},
 		};
 	},
 	watch: {
@@ -177,7 +177,7 @@ export default {
 				a = setTimeout(() => {
 					this.NeedHide = false;
 				}, 1000);
-			}
+			},
 		},
 		UserDiskData: {
 			handler() {
@@ -195,19 +195,19 @@ export default {
 					this.DiskData.SelectTips = this.UserDiskData.length + '个项目';
 				}
 			},
-			deep: true
+			deep: true,
 		},
 		loadClassify: {
 			handler() {
 				if (this.DiskData.Type === 'trans') {
 					this.$nextTick(() => {
-						this.TransformData.forEach(item => {
+						this.TransformData.forEach((item) => {
 							item.shows = this.loadClassify === item.state || (item.trans_type === this.loadClassify && item.state !== 'completed');
 						});
 					});
 				}
 			},
-			deep: true
+			deep: true,
 		},
 		TransformData: {
 			handler() {
@@ -236,8 +236,8 @@ export default {
 				});
 				this.$Api.LocalFile.write('transfer', this.TransformData);
 			},
-			deep: true
-		}
+			deep: true,
+		},
 	},
 	computed: {
 		isDisk() {
@@ -276,7 +276,7 @@ export default {
 				(this.DiskData.DiskShowState !== 'cd-disk-block-file' && this.NoTransType ? '32px' : '0px') +
 				')'
 			);
-		}
+		},
 	},
 	created() {
 		console.log('主窗口');
@@ -285,31 +285,31 @@ export default {
 	},
 	methods: {
 		/*初始化*/
-		Bind: function() {
+		Bind: function () {
 			window.addEventListener(
 				'dragenter',
-				function(e) {
+				function (e) {
 					e.preventDefault();
 				},
 				false
 			);
 			window.addEventListener(
 				'dragover',
-				function(e) {
+				function (e) {
 					e.preventDefault();
 				},
 				false
 			);
 			window.addEventListener(
 				'dragleave',
-				function(e) {
+				function (e) {
 					e.preventDefault();
 				},
 				false
 			);
 			window.addEventListener(
 				'drop',
-				function(e) {
+				function (e) {
 					e.preventDefault();
 				},
 				false
@@ -339,10 +339,10 @@ export default {
 					() => {
 						this.login = true;
 						this.GetMainFile(null, this.loadClassify);
-						this.$Api.LocalFile.read('transfer', data => {
+						this.$Api.LocalFile.read('transfer', (data) => {
 							if (data.length) {
 								this.TransformData = data;
-								this.TransformData.forEach(item => {
+								this.TransformData.forEach((item) => {
 									// alert('132');
 									if (item.trans_type === 'download' && item.state !== 'completed') {
 										this.$electron.remote.getCurrentWindow().webContents.downloadURL(item.disk_main + '?disk_name=' + item.disk_name);
@@ -350,7 +350,7 @@ export default {
 								});
 							}
 						});
-						this.$Api.LocalFile.read('setting', data => {
+						this.$Api.LocalFile.read('setting', (data) => {
 							this.ConfigObject = data;
 							this.$ipc.send('system', 'download-update', data.TransDownFolder);
 						});
@@ -442,6 +442,7 @@ export default {
 				return (this.DiskData.ClipboardType = commend);
 			}
 			commend = commend ? commend : 'newFolder';
+			let delete_data = null;
 			switch (commend) {
 				case 'open' /*打开文件夹/文件*/:
 					let item = datas;
@@ -460,7 +461,7 @@ export default {
 						} else if (OpenType !== null) {
 							let data = [];
 							if (OpenType === 'image' || OpenType === 'video' || OpenType === 'audio') {
-								this.UserDiskData.forEach(file => {
+								this.UserDiskData.forEach((file) => {
 									if (file.type.Exist(item.TypeArray)) {
 										data.push(file);
 									}
@@ -485,7 +486,7 @@ export default {
 					break;
 				case 'download': //下载文件
 					if (this.DiskData.SelectFiles.length) {
-						this.DiskData.SelectFiles.forEach(item => {
+						this.DiskData.SelectFiles.forEach((item) => {
 							if (item.disk_main) {
 								this.SelectDownLoadFiles.push(item);
 							}
@@ -496,7 +497,7 @@ export default {
 						}
 					}
 					let tips = this.SelectDownLoadFiles.length > 1 ? '所选' + this.SelectDownLoadFiles.length + '个项目' : this.SelectDownLoadFiles[0].disk_name;
-					this.SelectDownLoadFiles.forEach(item => {
+					this.SelectDownLoadFiles.forEach((item) => {
 						this.$electron.remote.getCurrentWindow().webContents.downloadURL(item.disk_main + '?disk_name=' + item.disk_name);
 					});
 					this.SelectDownLoadFiles = [];
@@ -512,9 +513,9 @@ export default {
 					this.$Api.Disk.Search(
 						{
 							id: datas,
-							page: this.DiskPage
+							page: this.DiskPage,
 						},
-						rs => {
+						(rs) => {
 							this.DiskBatchData('print', rs);
 						}
 					);
@@ -533,26 +534,32 @@ export default {
 					this.InputConfrim({
 						title: '新建文件夹',
 						tips: '请输入文件夹名称',
-						callback: value => {
+						callback: (value) => {
 							if (value.length === 0) {
 								return this.$Message.error('文件夹名称不能为空');
 							}
-							this.$Api.Disk.NewFolder(
-								{
-									name: value,
-									parent_id: this.NowDiskID
-								},
-								rs => {
-									rs = rs[0];
-									if (rs.disk_id) {
-										this.UserDiskData.push(rs);
-										this.$Message.success(value + ' 已创建');
-									} else {
-										this.$Message.error(value + ' 已存在');
-									}
+							this.$Api.Disk.NewFolder({
+								fileName: value,
+								filePath: this.DiskData.NavData.length === 0 ? '/' : this.DiskData.NavData.filePath,
+								isDir: 1,
+							}).then(res => {
+								if (res) {
+									this.UserDiskData.push({
+										fileName: res.data.fileName,
+										extendName: res.data.extendName,
+										create_time: res.data.uploadTime,
+										modify_time: '',
+										$size: 0,
+										disk_size: 0,
+										shareAddress: '',
+										$icon:'FolderType.png',
+									});
+									this.$Message.success(value + ' 已创建');
+								} else {
+									this.$Message.error(value + ' 已存在');
 								}
-							);
-						}
+							});
+						},
 					});
 					break;
 				case 'clear':
@@ -568,7 +575,7 @@ export default {
 					if (this.DiskData.Clipboard.length === 0) {
 						return;
 					}
-					this.DiskData.Clipboard.forEach(item => {
+					this.DiskData.Clipboard.forEach((item) => {
 						CopySize = CopySize + parseInt(item.disk_size);
 						if (this.NowDiskID === item.disk_id) {
 							this.DiskFeatureControl('clear');
@@ -593,13 +600,13 @@ export default {
 					this.$Api.Disk[this.DiskData.ClipboardType](
 						{
 							id: data,
-							parent_id: this.NowDiskID
+							parent_id: this.NowDiskID,
 						},
-						rs => {
+						(rs) => {
 							rs = rs[0];
 							if (rs.state === 'success') {
 								let CopyFlag = false; //判断是否有复制和粘贴时同一个目录的
-								this.DiskData.Clipboard.forEach(item => {
+								this.DiskData.Clipboard.forEach((item) => {
 									if (this.DiskData.ClipboardType === 'Copy') {
 										item.disk_name = item.disk_name + '-复制';
 										if (item.parent_id === this.NowDiskID) {
@@ -629,9 +636,9 @@ export default {
 						callback: () => {
 							this.$Api.Disk.Trash(
 								{
-									id: data
+									id: data,
 								},
-								rs => {
+								(rs) => {
 									rs = rs[0];
 									if (rs.state === 'success') {
 										this.$Message.success('移入回收站成功');
@@ -641,11 +648,11 @@ export default {
 									}
 								}
 							);
-						}
+						},
 					});
 					break;
 				case 'delete': //文件删除
-					let delete_data = this.DiskBatchData();
+					this.DiskBatchData();
 					data = this.DiskBatchData('post', delete_data);
 					this.Confrim({
 						title: '删除',
@@ -653,9 +660,9 @@ export default {
 						callback: () => {
 							this.$Api.Disk.Delete(
 								{
-									id: data
+									id: data,
 								},
-								rs => {
+								(rs) => {
 									rs = rs[0];
 									if (rs.state === 'success') {
 										this.$Message.success('删除成功');
@@ -665,18 +672,18 @@ export default {
 									}
 								}
 							);
-						}
+						},
 					});
 					break;
 				// 删除回收站文件
 				case 'delete-recovery':
-					let delete_data = this.DiskBatchData();
+					delete_data = this.DiskBatchData();
 					data = this.DiskBatchData('post', delete_data);
 					this.Confrim({
 						title: '删除',
 						tips: '是否将所选' + delete_data.length + '个文件彻底删除',
 						callback: () => {
-							this.$Api.Disk.DelRecoverFile(data, 							rs => {
+							this.$Api.Disk.DelRecoverFile(data, (rs) => {
 								rs = rs[0];
 								if (rs.state === 'success') {
 									this.$Message.success('删除成功');
@@ -685,8 +692,8 @@ export default {
 									this.$Message.success('删除失败');
 								}
 							});
-						}
-					})
+						},
+					});
 					break;
 				case 'restore': //文件还原
 					let restore_data = this.DiskBatchData();
@@ -697,9 +704,9 @@ export default {
 						callback: () => {
 							this.$Api.Disk.Restore(
 								{
-									id: data
+									id: data,
 								},
-								rs => {
+								(rs) => {
 									rs = rs[0];
 									if (rs.state === 'success') {
 										this.$Message.success('还原成功');
@@ -709,7 +716,7 @@ export default {
 									}
 								}
 							);
-						}
+						},
 					});
 					break;
 				case 'rename': //重命名
@@ -717,16 +724,16 @@ export default {
 						title: '重命名',
 						tips: '请输入新的文件/文件夹名称',
 						value: this.DiskData.NowSelect.disk_name,
-						callback: value => {
+						callback: (value) => {
 							if (value.length === 0) {
 								return this.$Message.error('文件名不能为空');
 							}
 							this.$Api.Disk.Rename(
 								{
 									name: value,
-									id: this.DiskData.NowSelect.disk_id
+									id: this.DiskData.NowSelect.disk_id,
 								},
-								rs => {
+								(rs) => {
 									rs = rs[0];
 									if (rs.state === 'success') {
 										this.UserDiskData[this.DiskData.NowIndex].disk_name = value;
@@ -736,7 +743,7 @@ export default {
 									}
 								}
 							);
-						}
+						},
 					});
 					break;
 				case 'info': //文件属性
@@ -753,7 +760,7 @@ export default {
 							callback: () => {
 								this.$Message.info('链接已复制');
 								this.$electron.clipboard.writeText(this.DiskData.NowSelect.shareAddress);
-							}
+							},
 						});
 					} else {
 						this.showShare = true;
@@ -763,7 +770,7 @@ export default {
 					this.$refs.DiskShareModel.ShareFile(this.DiskData.NowSelect);
 					break;
 				case 'update-share': //更新文件分享状态
-					this.FindInDisk(this.DiskData.NowSelect, item => {
+					this.FindInDisk(this.DiskData.NowSelect, (item) => {
 						item.share = datas;
 						item.shareAddress = localStorage.server + '/s/' + datas;
 					});
@@ -776,9 +783,9 @@ export default {
 							this.$Api.Disk.CancelShare(
 								{
 									id: this.DiskData.NowSelect.disk_id,
-									share_id: this.DiskData.NowSelect.share
+									share_id: this.DiskData.NowSelect.share,
 								},
-								rs => {
+								(rs) => {
 									if (rs[0].state === 'success') {
 										this.$Message.success('分享已取消');
 										this.$nextTick(() => {
@@ -787,7 +794,7 @@ export default {
 												data.push(this.DiskData.NowSelect);
 												this.DiskBatchData('remove', data);
 											} else {
-												this.FindInDisk(this.DiskData.NowSelect, item => {
+												this.FindInDisk(this.DiskData.NowSelect, (item) => {
 													item.share = '';
 												});
 											}
@@ -797,7 +804,7 @@ export default {
 									}
 								}
 							);
-						}
+						},
 					});
 					break;
 				case 'reload':
@@ -852,7 +859,7 @@ export default {
 						this.DiskLoadCount = 0;
 					}
 					this.LoadCompany = true;
-					data.data.forEach(item => {
+					data.data.forEach((item) => {
 						this.UserDiskData.push(item);
 					});
 					if (data.length) {
@@ -888,27 +895,27 @@ export default {
 						filePath: path || '/',
 						fileType: this.typeMapping(type),
 						currentPage: 1,
-						pageCount: 10
+						pageCount: 10,
 					},
-					rs => {
+					(rs) => {
 						this.DiskBatchData('print', rs);
 					}
 				);
 			} else if (type === 'trash') {
 				// 加载回收站
-				this.$Api.Disk.LoadTrash({}, res => {
-					debugger
+				this.$Api.Disk.LoadTrash({}, (res) => {
+					debugger;
 					this.DiskBatchData('print', res);
-				})
+				});
 			} else {
 				this.$Api.Disk.LoadFileByType(
 					{
 						filePath: path || '/',
 						fileType: this.typeMapping(type),
 						currentPage: 1,
-						pageCount: 10
+						pageCount: 10,
 					},
-					rs => {
+					(rs) => {
 						this.DiskBatchData('print', rs);
 					}
 				);
@@ -929,7 +936,7 @@ export default {
 				case 'music':
 					type = 4;
 					break;
-				case 'torrent':
+				case 'other':
 					type = 5;
 					break;
 				default:
@@ -959,14 +966,14 @@ export default {
 						filePath: item.filePath + item.fileName + '/',
 						fileType: '',
 						currentPage: 1,
-						pageCount: 10
+						pageCount: 10,
 					},
-					rs => {
+					(rs) => {
 						this.DiskBatchData('print', rs);
 						// 设置navivation
 						this.DiskData.NavData.push({
 							disk_name: item.fileName,
-							path: item.filePath + item.fileName + '/'
+							path: item.filePath + item.fileName + '/',
 						});
 					}
 				);
@@ -1012,7 +1019,7 @@ export default {
 			this.DiskData.SelectFiles.splice(index, 1);
 		},
 		ClearSelect() {
-			this.UserDiskData.forEach(item => {
+			this.UserDiskData.forEach((item) => {
 				item.active = false;
 			});
 			this.DiskData.SelectFiles = [];
@@ -1071,9 +1078,9 @@ export default {
 			this.$Api.Disk.UnZip(
 				{
 					url: this.DiskData.NowSelect.disk_main.split(localStorage.server)[1],
-					parent_id: this.SelectTrees.disk_id
+					parent_id: this.SelectTrees.disk_id,
 				},
-				rs => {
+				(rs) => {
 					if (!rs[0]) {
 						return this.$Message.error('解压失败');
 					}
@@ -1108,9 +1115,9 @@ export default {
 				this.$Api.Disk.Cut(
 					{
 						parent_id: this.SelectTrees.disk_id,
-						id: data
+						id: data,
 					},
-					rs => {
+					(rs) => {
 						rs = rs[0];
 						if (rs.state === 'success') {
 							this.DiskBatchData('remove', this.DiskData.SelectFiles);
@@ -1145,7 +1152,7 @@ export default {
 			let start = {
 				x: event.clientX - area.getBoundingClientRect().left + area.scrollLeft,
 				y: event.clientY - area.getBoundingClientRect().top + area.scrollTop,
-				maxy: area.scrollHeight
+				maxy: area.scrollHeight,
 			};
 			this.MouseSelectData.left = start.x;
 			this.MouseSelectData.top = start.y;
@@ -1154,28 +1161,28 @@ export default {
 					left: 0,
 					top: 0,
 					width: 0,
-					height: 0
+					height: 0,
 				};
 				document.onmousemove = null;
 			};
-			document.onmousemove = ev => {
+			document.onmousemove = (ev) => {
 				let end = {
 					x: ev.clientX - area.getBoundingClientRect().left + area.scrollLeft,
 					y: ev.clientY - area.getBoundingClientRect().top + area.scrollTop,
 					scrolldown: Math.min(ev.clientY - area.getBoundingClientRect().top, event.clientY - area.getBoundingClientRect().top) + 10 + area.offsetHeight,
-					scrollup: Math.min(ev.clientY - area.getBoundingClientRect().top, event.clientY - area.getBoundingClientRect().top)
+					scrollup: Math.min(ev.clientY - area.getBoundingClientRect().top, event.clientY - area.getBoundingClientRect().top),
 				};
 				this.MouseSelectData = {
 					left: Math.min(start.x, end.x) + 'px',
 					top: Math.min(start.y, end.y) + 'px',
 					width: Math.abs(end.x - start.x) + 'px',
-					height: Math.abs(end.y - start.y) + 'px'
+					height: Math.abs(end.y - start.y) + 'px',
 				};
 				let area_data = {
 					left: Math.min(start.x, end.x),
 					top: Math.min(start.y, end.y),
 					width: Math.abs(end.x - start.x),
-					height: Math.abs(end.y - start.y)
+					height: Math.abs(end.y - start.y),
 				};
 				let selList = document.getElementsByClassName(this.DiskData.DiskShowState);
 				this.ClearSelect();
@@ -1198,14 +1205,14 @@ export default {
 		},
 		FindInDisk(list, callback) {
 			let result = null;
-			this.UserDiskData.forEach(item => {
+			this.UserDiskData.forEach((item) => {
 				if (item.disk_id === list.disk_id) {
 					result = item;
 					callback(item);
 				}
 			});
 			return result;
-		}
+		},
 	},
 	mounted() {
 		console.log('主窗口');
@@ -1215,7 +1222,7 @@ export default {
 		setTimeout(() => {
 			console.log('主窗口');
 		}, 1000);
-	}
+	},
 };
 </script>
 

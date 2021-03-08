@@ -59,7 +59,7 @@ export default {
 				{ name: '视频', icon: 'sf-icon-video', data: 'video', active: '' },
 				{ name: '文档', icon: 'sf-icon-file-alt', data: 'document', active: '' },
 				{ name: '音乐', icon: 'sf-icon-music', data: 'music', active: '' },
-				{ name: '种子', icon: 'sf-icon-magnet', data: 'torrent', active: '' },
+				// { name: '种子', icon: 'sf-icon-magnet', data: 'torrent', active: '' },
 				{ name: '其他', icon: 'sf-icon-puzzle-piece', data: 'other', active: '' },
 				{ name: '回收站', icon: 'sf-icon-trash', data: 'trash', active: '' }
 			], //网盘分类参数

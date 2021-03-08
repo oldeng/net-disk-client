@@ -287,83 +287,84 @@ export default {
 				this.$Message.warning('请输入密码');
 				return false;
 			}
-			// if (this.PostState) {
-			// 	this.$Message.warning('正在验证登录信息');
-			// 	return false;
-			// }
-			// this.PostState = 'cd-index-posting';
-			// this.$Api.User.Login(
-			// 	{
-			// 		username: username,
-			// 		password: password
-			// 	},
-			// 	res => {
-			// 		// this.PostState = '';
-			// 		if (!res.success) {
-			// 			this.$Message.error('服务器错误');
-			// 			return;
-			// 		}
-			// 		this.LoginSuccess = true;
-			// 		this.WindowObject.setSize(800, 300);
-			// 		this.WindowObject.setAlwaysOnTop(false);
-			// 		setTimeout(() => {
-			// 			this.LoadingText = '正在加载网盘数据';
-			// 			this.$ipc.send('system', 'login', {
-			// 				username: username,
-			// 				password: password
-			// 			});
-			// 			setTimeout(() => {
-			// 				this.LoadingText = '欢迎回来 ' + rs.user;
-			// 			}, 1100);
-			// 		}, 1100);
-			// 	},
-			// 	res => {
-			// 		// this.PostState = '';
-			// 		if (res.msg === '未激活的用户') {
-			// 			this.$Message.info('请查看您的激活邮箱' + res.email);
-			// 			this.VerifyUserInput.value = username;
-			// 			this.changeType('verify');
-			// 		} else {
-			// 			this.$Message[res.success](res.msg);
-			// 		}
-			// 	}
-			// );
-
-			// this.PostState = '';
-			let res = {
-				success: true,
-				user: 'oldeng',
-				data: {
-					userId: 'oldeng',
-					token:
-						'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJwYXNzd29yZFwiOlwiOTJlYTk2YzIyZGZhYzgyMmNhNmRmNzhjNWFiYTFhMTBcIixcInJlZ2lzdGVyVGltZVwiOlwiMjAyMC0xMi0zMSAxNzozOTo1N1wiLFwic2FsdFwiOlwiMjA5MjkwMzQ4MjM1NDEwNVwiLFwidGVsZXBob25lXCI6XCIxNzE3ODg2OTk0M1wiLFwidXNlcklkXCI6NCxcInVzZXJuYW1lXCI6XCJ0ZXN0MlwifSIsImF1ZCI6InFpd2VuIiwicGFzc3dvcmQiOiIwMTAyMDMiLCJpc3MiOiJxaXdlbnNoYXJlIiwiZXhwIjoxNjE0NTYxODY3LCJpYXQiOjE2MTM5NTcwNjcsImp0aSI6IjJmZTI5YTBmLWRiYmUtNGJlOC04ZWQyLTBmMTUzYTEwMjg2NSIsInVzZXJuYW1lIjoiYWRtaW4ifQ.N_Hlar3j08_sq_ocEIZcRtn7sPqkpIgARmv8PmcJDrs'
-				}
-			};
-			let data = {
-				userId: 'oldeng'
-			};
-			if (!res.success) {
-				this.$Message.error('服务器错误');
-				return;
+			if (this.PostState) {
+				this.$Message.warning('正在验证登录信息');
+				return false;
 			}
-			this.LoginSuccess = true;
-			this.WindowObject.setSize(800, 300);
-			this.WindowObject.setAlwaysOnTop(false);
-			LocalFile.init(res.data.userId, () => {
-				LocalFile.write('key', res.data.userId);
-				LocalFile.write('login', JSON.parse(JSON.stringify(data)), true);
-				Cookies.set('token', res.data.token);
-			});
-			setTimeout(() => {
-				this.LoadingText = '正在加载网盘数据';
-				this.$ipc.send('system', 'login', {
+			this.PostState = 'cd-index-posting';
+			Cookies.remove('token');
+			this.$Api.User.Login(
+				{
 					username: username,
 					password: password
-				});
-				setTimeout(() => {
-					this.LoadingText = '欢迎回来 ' + res.user;
-				}, 1100);
-			}, 1100);
+				},
+				res => {
+					// this.PostState = '';
+					if (!res.success) {
+						this.$Message.error('服务器错误');
+						return;
+					}
+					this.LoginSuccess = true;
+					this.WindowObject.setSize(800, 300);
+					this.WindowObject.setAlwaysOnTop(false);
+					setTimeout(() => {
+						this.LoadingText = '正在加载网盘数据';
+						this.$ipc.send('system', 'login', {
+							username: username,
+							password: password
+						});
+						setTimeout(() => {
+							this.LoadingText = '欢迎回来 ' + rs.user;
+						}, 1100);
+					}, 1100);
+				},
+				res => {
+					// this.PostState = '';
+					if (res.msg === '未激活的用户') {
+						this.$Message.info('请查看您的激活邮箱' + res.email);
+						this.VerifyUserInput.value = username;
+						this.changeType('verify');
+					} else {
+						this.$Message[res.success](res.msg);
+					}
+					if (!res.success) {
+						this.$Message.error('服务器错误');
+						return;
+					}
+					this.LoginSuccess = true;
+					this.WindowObject.setSize(800, 300);
+					this.WindowObject.setAlwaysOnTop(false);
+					LocalFile.init(res.data.userId, () => {
+						LocalFile.write('key', res.data.userId);
+						LocalFile.write('login', JSON.parse(JSON.stringify(data)), true);
+						Cookies.set('token', res.data.token);
+					});
+					setTimeout(() => {
+						this.LoadingText = '正在加载网盘数据';
+						this.$ipc.send('system', 'login', {
+							username: username,
+							password: password
+						});
+						setTimeout(() => {
+							this.LoadingText = '欢迎回来 ' + res.user;
+						}, 1100);
+					}, 1100);
+				}
+			);
+
+			this.PostState = '';
+			// let res = {
+			// 	success: true,
+			// 	user: 'oldeng',
+			// 	data: {
+			// 		userId: 'oldeng',
+			// 		token:
+			// 			'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJwYXNzd29yZFwiOlwiOTJlYTk2YzIyZGZhYzgyMmNhNmRmNzhjNWFiYTFhMTBcIixcInJlZ2lzdGVyVGltZVwiOlwiMjAyMC0xMi0zMSAxNzozOTo1N1wiLFwic2FsdFwiOlwiMjA5MjkwMzQ4MjM1NDEwNVwiLFwidGVsZXBob25lXCI6XCIxNzE3ODg2OTk0M1wiLFwidXNlcklkXCI6NCxcInVzZXJuYW1lXCI6XCJ0ZXN0MlwifSIsImF1ZCI6InFpd2VuIiwicGFzc3dvcmQiOiIwMTAyMDMiLCJpc3MiOiJxaXdlbnNoYXJlIiwiZXhwIjoxNjE0NTYxODY3LCJpYXQiOjE2MTM5NTcwNjcsImp0aSI6IjJmZTI5YTBmLWRiYmUtNGJlOC04ZWQyLTBmMTUzYTEwMjg2NSIsInVzZXJuYW1lIjoiYWRtaW4ifQ.N_Hlar3j08_sq_ocEIZcRtn7sPqkpIgARmv8PmcJDrs'
+			// 	}
+			// };
+			// let data = {
+			// 	userId: 'oldeng'
+			// };
 		},
 		register: function() {
 			let username = this.RegisterUserInput.value;

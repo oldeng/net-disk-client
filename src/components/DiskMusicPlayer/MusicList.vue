@@ -23,10 +23,10 @@ export default {
 			this.$emit('play', item, index);
 		}
 	},
-	mounted () {
+	mounted() {
 		this.$nextTick(() => {
 			console.log('this.PlayList', this.PlayList);
-		})
+		});
 	}
 };
 </script>

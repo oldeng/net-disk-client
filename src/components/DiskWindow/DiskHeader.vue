@@ -11,7 +11,7 @@
 				<li class="item">{{ UserInfo.username }}</li>
 				<DropdownMenu slot="list">
 					<DropdownItem name="account">
-						<img draggable="false" :src="UserInfo.userhead" alt="" />
+						<img draggable="false" :src="IconUser" alt="" />
 						<span>我</span>
 					</DropdownItem>
 					<DropdownItem name="setting">系统设置</DropdownItem>
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import IconUser from '../../assets/img/disk/user.png';
 export default {
 	name: 'DiskHeader',
 	props: {
@@ -56,6 +57,9 @@ export default {
 			],
 			DiskWindow: false
 		};
+	},
+	created() {
+		this.IconUser = IconUser;
 	},
 	beforeMount() {
 		this.DiskWindow = this.$electron.remote.getCurrentWindow();

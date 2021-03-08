@@ -12,10 +12,9 @@ function updateServer() {
 // 请求拦截器
 axios.interceptors.request.use(
 	config => {
-		if (Cookies.get('token', { domain: '' })) {
-			config.headers['token'] = Cookies.get('token', { domain: '' });
-		} else {
-			config.headers['token'] = Cookies.get('token');
+		let token = Cookies.get('token', { domain: '' });
+		if ((config.headers['token'] = Cookies.get('token'))) {
+			config.headers['token'] = token;
 		}
 		return config;
 	},
@@ -54,17 +53,6 @@ function Ajax(options) {
 }
 
 export function post(url, data = {}, info) {
-	// let newData = data;
-	// if (info) {
-	// 	//  转formData格式
-	// 	newData = new FormData();
-	// 	for (let i in data) {
-	// 		newData.append(i, data[i]);
-	// 	}
-	// }
-	// return axios.post(url, newData).then(res => {
-	// 	return res.data;
-	// });
 	const instance = axios.create();
 	const options = Object.assign(
 		{

@@ -1,4 +1,4 @@
-import { Ajax, severAddress } from './request';
+import { Ajax, post, severAddress } from './request';
 let FileType = {
 	android: {
 		TypeArray: 'apk',
@@ -165,17 +165,9 @@ export default {
 			error: error
 		});
 	},
-	NewFolder(data, callback, error) {
-		Ajax({
-			url: '/service/disk/NewFolder',
-			data: data,
-			success: rs => {
-				rs.forEach(item => {
-					this.DiskData(item);
-				});
-				callback(rs);
-			},
-			error: error
+	NewFolder(data) {
+		return post('/api/file/createfile', data).then(res => {
+			return res;
 		});
 	},
 	Copy(data, callback, error) {

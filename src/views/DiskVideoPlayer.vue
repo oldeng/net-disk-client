@@ -111,7 +111,7 @@ export default {
 	},
 	created() {
 		this.player = null;
-		this.state = 'playing'; // stop 
+		this.state = 'playing'; // stop
 		this.$ipc.on('win-data', (event, data) => {
 			//接收打开视频文件的数据
 			this.$nextTick(() => {
@@ -175,7 +175,7 @@ export default {
 					console.log('播放中...');
 					this.state = 'playing';
 				});
-				this.player.on('timeupdate', (arg) => {
+				this.player.on('timeupdate', arg => {
 					// console.log('arg', arg);
 					console.log(arg.currentTime, arg.duration);
 					this.VideoProcess(arg);

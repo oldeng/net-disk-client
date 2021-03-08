@@ -16,6 +16,7 @@ module.exports = {
 	// productionSourceMap: false,
 	devServer: {
 		port: port,
+		clientLogLevel: 'debug',
 		proxy: {
 			'/user/login': {
 				target: 'http://localhost:8090'
@@ -26,7 +27,10 @@ module.exports = {
 			'/filetransfer/uploadfile': {
 				target: 'http://localhost:8090'
 			},
-			'/api/upload/*': {
+			// '/api/file/createfile': {
+			// 	target: 'http://localhost:8090'
+			// },
+			'/api/*': {
 				target: 'http://localhost:8090',
 				pathRewrite: {
 					'^/api': '/'

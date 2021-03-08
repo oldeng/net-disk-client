@@ -4,8 +4,10 @@ import Cookies from 'js-cookie';
 
 export default {
 	Login(data, callback, error) {
-		post('/user/login', data)
+		let params = new URLSearchParams(data);
+		post(`/user/login?${params.toString()}`, data)
 			.then(res => {
+				Cookies.set('token', res.data.token);
 				if (res.success) {
 					LocalFile.init(res.data.userId, () => {
 						LocalFile.write('key', res.data.userId);
